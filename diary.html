@@ -110,6 +110,13 @@
       padding: 16px 20px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
       animation: fadeSlideIn 0.25s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .record-body {
+      flex: 1;
     }
 
     @keyframes fadeSlideIn {
@@ -129,6 +136,34 @@
       font-size: 1rem;
       line-height: 1.6;
       color: #ececec;
+    }
+
+    .delete-btn {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: opacity 0.15s, background 0.15s;
+      margin-top: 1px;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .delete-btn:hover {
+      opacity: 1;
+      background: #2e2e2e;
+    }
+
+    .delete-btn:active {
+      background: #3a3a3a;
+      transform: none;
     }
   </style>
 </head>
@@ -154,34 +189,69 @@
   <script>
     function today() {
       const d = new Date();
-      return d.getFullYear() + "年" +
-             (d.getMonth() + 1) + "月" +
-             d.getDate() + "日";
+      return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日";
+    }
+
+    function load() {
+      return JSON.parse(localStorage.getItem("diary") || "[]");
+    }
+
+    function save(records) {
+      localStorage.setItem("diary", JSON.stringify(records));
+    }
+
+    function renderAll() {
+      const records = load();
+      const container = document.getElementById("records");
+      container.innerHTML = "";
+      records.forEach((r, i) => {
+        container.appendChild(createCard(r, i));
+      });
+    }
+
+    function createCard(record, index) {
+      const item = document.createElement("div");
+      item.className = "record-item";
+      item.innerHTML = `
+        <div class="record-body">
+          <div class="record-date">${record.date}</div>
+          <div class="record-text">${record.text}</div>
+        </div>
+        <button class="delete-btn" aria-label="削除" onclick="deleteRecord(${index})">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L11 11M11 1L1 11" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      `;
+      return item;
     }
 
     function addRecord() {
       const input = document.getElementById("messageInput");
       const text = input.value.trim();
-
       if (text === "") return;
 
-      const item = document.createElement("div");
-      item.className = "record-item";
-      item.innerHTML = `
-        <div class="record-date">${today()}</div>
-        <div class="record-text">${text}</div>
-      `;
-
-      const records = document.getElementById("records");
-      records.prepend(item);
+      const records = load();
+      records.unshift({ date: today(), text });
+      save(records);
+      renderAll();
 
       input.value = "";
       input.focus();
     }
 
+    function deleteRecord(index) {
+      const records = load();
+      records.splice(index, 1);
+      save(records);
+      renderAll();
+    }
+
     document.getElementById("messageInput").addEventListener("keydown", function(e) {
       if (e.key === "Enter") addRecord();
     });
+
+    renderAll();
   </script>
 </body>
 </html>
