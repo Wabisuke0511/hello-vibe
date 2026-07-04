@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今日のひとこと — 仕様書</title>
+  <style>
+    :root {
+      --bg:        #111111;
+      --surface:   #1c1c1e;
+      --surface2:  #2c2c2e;
+      --border:    #3a3a3c;
+      --text:      #f5f5f7;
+      --text-sub:  #8e8e93;
+      --accent:    #e8622a;
+      --accent2:   #ff9f0a;
+      --green:     #30d158;
+      --blue:      #0a84ff;
+      --radius:    12px;
+      --font:      'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 48px 24px 80px;
+    }
+
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ヘッダー */
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 32px;
+      margin-bottom: 48px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      color: var(--text-sub);
+      font-size: 13px;
+    }
+
+    .meta span { display: flex; align-items: center; gap: 6px; }
+
+    .badge {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    /* セクション共通 */
+    section { margin-bottom: 48px; }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    p { color: var(--text-sub); margin-bottom: 12px; }
+    p:last-child { margin-bottom: 0; }
+
+    /* カード */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+
+    .card:last-child { margin-bottom: 0; }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .card p { font-size: 14px; }
+
+    /* アーキテクチャ図 */
+    .arch {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .arch-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .arch-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .arch-box.accent { border-color: var(--accent); color: var(--accent); }
+    .arch-box.green  { border-color: var(--green);  color: var(--green);  }
+    .arch-box.blue   { border-color: var(--blue);   color: var(--blue);   }
+
+    .arch-arrow {
+      color: var(--text-sub);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .arch-note {
+      font-size: 12px;
+      color: var(--text-sub);
+      flex: 1;
+    }
+
+    /* テックスタック */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .stack-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+
+    .stack-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stack-desc {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin: 0;
+    }
+
+    /* 要件リスト */
+    .req-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .req-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 14px;
+    }
+
+    .req-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* URL */
+    .url-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .url-label { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; }
+
+    .url-value {
+      font-size: 13px;
+      color: var(--blue);
+      word-break: break-all;
+      text-decoration: none;
+    }
+
+    .url-value:hover { text-decoration: underline; }
+
+    /* 進捗 */
+    .progress-bar {
+      background: var(--surface2);
+      border-radius: 100px;
+      height: 6px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* フッター */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      margin-top: 48px;
+      color: var(--text-sub);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="eyebrow">Project Document</div>
+    <div style="font-size:18px; color:var(--text); font-weight:500; margin-bottom:6px;">アプリ名：</div>
+    <h1>今日のひとこと</h1>
+    <div class="meta">
+      <span>📅 作成日：2026年7月4日</span>
+      <span>👤 作者：Wabisuke0511</span>
+      <span><span class="badge">v1.0</span></span>
+      <span><span class="badge">公開済み</span></span>
+    </div>
+  </header>
+
+  <!-- 概要 -->
+  <section>
+    <div class="section-label">Overview</div>
+    <div class="card">
+      <div class="card-title">アプリ概要</div>
+      <p>一行で今日の出来事や気持ちを記録するミニ日記アプリ。ブラウザ上で動作し、PCでもスマホでもURLひとつで使える。記録は端末のブラウザに保存され、再読み込みしても消えない。日本語・英語・ドイツ語・中国語への翻訳機能を備える。</p>
+    </div>
+  </section>
+
+  <!-- システム構造 -->
+  <section>
+    <div class="section-label">System Architecture</div>
+    <h2>システム構造</h2>
+    <div class="arch">
+      <div class="arch-row">
+        <div class="arch-box accent">ユーザー</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">ブラウザ（diary.html）</div>
+        <div class="arch-note">HTML / CSS / JavaScript で構成された単一ファイル</div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box" style="margin-left:152px">localStorage</div>
+        <div class="arch-arrow">←→</div>
+        <div class="arch-box">JavaScript（記録管理）</div>
+        <div class="arch-note">記録の保存・読み込み・削除を管理</div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box" style="margin-left:152px">Google翻訳 API（非公式）</div>
+        <div class="arch-arrow">←→</div>
+        <div class="arch-box blue">翻訳モジュール</div>
+        <div class="arch-note">地球儀アイコン押下で画面全体を翻訳</div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box green">GitHub Pages</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">ユーザーのブラウザ</div>
+        <div class="arch-note">無料ホスティング。URLで世界中からアクセス可能</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- テックスタック -->
+  <section>
+    <div class="section-label">Tech Stack</div>
+    <h2>使用技術</h2>
+    <div class="stack-grid">
+      <div class="stack-item">
+        <div class="stack-name">HTML / CSS / JavaScript</div>
+        <p class="stack-desc">単一ファイル構成。フレームワーク不使用。</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">localStorage</div>
+        <p class="stack-desc">ブラウザ内蔵のデータ保存。サーバー不要。</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">Google翻訳（非公式）</div>
+        <p class="stack-desc">APIキー不要。画面全体を4言語に翻訳。</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-name">GitHub / GitHub Pages</div>
+        <p class="stack-desc">バージョン管理・無料ホスティング。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 要求 -->
+  <section>
+    <div class="section-label">Requirements</div>
+    <h2>要求（作りたかったもの）</h2>
+    <ul class="req-list">
+      <li><span class="req-icon">📝</span>一行で今日のことを手軽に残せる場所が欲しい</li>
+      <li><span class="req-icon">📱</span>PCでもiPhoneでも同じURLで使えること</li>
+      <li><span class="req-icon">💾</span>再読み込みしても記録が消えないこと</li>
+      <li><span class="req-icon">🌍</span>日本語・英語・ドイツ語・中国語に切り替えられること</li>
+      <li><span class="req-icon">🎨</span>ダサいと使いたくなくなるので、ClaudeやiOSのような洗練された見た目にしたい</li>
+      <li><span class="req-icon">🔗</span>URLを人に送れる形で公開したい</li>
+    </ul>
+  </section>
+
+  <!-- 要件 -->
+  <section>
+    <div class="section-label">Specifications</div>
+    <h2>要件（作ったもの）</h2>
+    <ul class="req-list">
+      <li><span class="req-icon">✅</span>テキスト入力欄と矢印アイコンのボタンで、一行の記録を追加できる</li>
+      <li><span class="req-icon">✅</span>記録は日付つきのカードで一覧表示される</li>
+      <li><span class="req-icon">✅</span>各カードに削除ボタン（×）があり、不要な記録を消せる</li>
+      <li><span class="req-icon">✅</span>記録はlocalStorageに保存され、ブラウザを閉じても残る</li>
+      <li><span class="req-icon">✅</span>右上の地球儀アイコンで日本語・英語・ドイツ語・中国語を切り替えられる</li>
+      <li><span class="req-icon">✅</span>翻訳は記録カードの中身も含め、画面全体に適用される</li>
+      <li><span class="req-icon">✅</span>日本語に戻すと元のテキストが復元される</li>
+      <li><span class="req-icon">✅</span>GitHub Pagesで公開済み。PCでもスマホでも動作確認済み</li>
+      <li><span class="req-icon">✅</span>ダークモード・角丸・薄い影・矢印アイコンの洗練されたUIデザイン</li>
+    </ul>
+  </section>
+
+  <!-- 公開情報 -->
+  <section>
+    <div class="section-label">Deployment</div>
+    <h2>公開情報</h2>
+    <div class="url-block">
+      <div>
+        <div class="url-label">公開URL</div>
+        <a class="url-value" href="https://wabisuke0511.github.io/hello-vibe/diary.html" target="_blank">
+          https://wabisuke0511.github.io/hello-vibe/diary.html
+        </a>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="url-block">
+      <div>
+        <div class="url-label">GitHubリポジトリ</div>
+        <a class="url-value" href="https://github.com/Wabisuke0511/hello-vibe" target="_blank">
+          https://github.com/Wabisuke0511/hello-vibe
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 制作記録 -->
+  <section>
+    <div class="section-label">Development Log</div>
+    <h2>制作記録</h2>
+    <div class="card">
+      <div class="card-title">🗓 6月25日（1日目）</div>
+      <p>Git・Node.js・Claude Code のインストール。PATH トラブルを切り分けて解決。最初のHelloページを生成。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🗓 6月27日（2日目）</div>
+      <p>GitHub アカウント作成・リポジトリ登録。日記アプリ「今日のひとこと」の初期版を生成・公開。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🗓 6月29日（3日目）</div>
+      <p>ダークモードへのデザイン刷新。矢印アイコンボタンへの変更。localStorage による記録保存・削除機能を実装。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🗓 7月2日（4日目）</div>
+      <p>地球儀アイコンによる画面全体の多言語翻訳機能を実装。GitHub Pages で公開。URLを共有して動作確認完了。</p>
+    </div>
+  </section>
+
+  <!-- 今後の展望 -->
+  <section>
+    <div class="section-label">Next Steps</div>
+    <h2>今後の展望</h2>
+    <ul class="req-list">
+      <li><span class="req-icon">🩺</span>血圧記録アプリの開発（音声入力＋AI整理）</li>
+      <li><span class="req-icon">📚</span>娘の学習記録・目標達成アプリの開発</li>
+      <li><span class="req-icon">🔔</span>リマインダー・通知機能の実装</li>
+      <li><span class="req-icon">📊</span>記録のグラフ表示・推移の可視化</li>
+      <li><span class="req-icon">🌐</span>公式翻訳API（DeepLなど）への切り替え</li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <span>今日のひとこと — 仕様書 v1.0</span>
+    <span>作成：Wabisuke0511 ／ 2026年7月4日</span>
+  </footer>
+
+</div>
+</body>
+</html>
